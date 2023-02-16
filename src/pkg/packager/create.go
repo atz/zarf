@@ -5,8 +5,6 @@
 package packager
 
 import (
-	"bufio"
-	"bytes"
 	"crypto"
 	"encoding/json"
 	"fmt"
@@ -30,7 +28,6 @@ import (
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/mholt/archiver/v3"
-	"github.com/openvex/go-vex/pkg/vex"
 )
 
 // Create generates a Zarf package tarball for a given PackageConfig and optional base directory.
@@ -405,19 +402,22 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 		spinner := message.NewProgressSpinner("Loading %d vex docs", len(component.Vex))
 		defer spinner.Success()
 		// Make vex directory
-		_ = utils.CreateDirectory(componentPath.Vex, 0700)
-
-		message.Debug()
+		// _ = utils.CreateDirectory(componentPath.Vex, 0700)
 
 		// Write vex files
-		for _, vexComponent := range component.Vex {
-			doc, err := vex.Load(vexComponent.Path)
-			if err != nil {
-				var b bytes.Buffer
-				w := bufio.NewWriter(&b)
-				doc.ToJSON(w)
-				utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b.Bytes())
+		for _, vex := range component.Vex {
+
+			if err := utils.CreatePathAndCopy(vex.Path, componentPath.Vex+"/"+vex.ComponentName); err != nil {
+				return nil, fmt.Errorf("unable to copy file %s: %w", vex.Path, err)
 			}
+
+			// doc, err := vex.Load(vexComponent.Path)
+			// if err != nil {
+			// 	var b bytes.Buffer
+			// 	w := bufio.NewWriter(&b)
+			// 	doc.ToJSON(w)
+			// 	utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b.Bytes())
+			// }
 		}
 	}
 
