@@ -5,6 +5,7 @@
 package packager
 
 import (
+	"bufio"
 	"bytes"
 	"crypto"
 	"encoding/json"
@@ -401,16 +402,21 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 
 	// Load VEX documents
 	if len(component.Vex) > 0 {
+		spinner := message.NewProgressSpinner("Loading %d vex docs", len(component.Vex))
+		defer spinner.Success()
 		// Make vex directory
 		_ = utils.CreateDirectory(componentPath.Vex, 0700)
+
+		message.Debug()
 
 		// Write vex files
 		for _, vexComponent := range component.Vex {
 			doc, err := vex.Load(vexComponent.Path)
 			if err != nil {
-				b := new(bytes.Buffer)
-				doc.ToJSON(b)
-				utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b)
+				var b bytes.Buffer
+				w := bufio.NewWriter(&b)
+				doc.ToJSON(w)
+				utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b.Bytes())
 			}
 		}
 	}
