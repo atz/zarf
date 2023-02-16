@@ -2,16 +2,11 @@ kind: ZarfPackageConfig
 metadata:
   name: vex-example
   description: 'Demo Zarf package composability with VEX documents'
-  architecture: arm64
 
 components:
   - name: test-component
     required: true
     description: 'Example component that has a VEX document'
-    only:
-      localOs: linux
-      cluster:
-        architecture: arm64
     vex:
       - name: test-component-vex
         path: ./vex/test-component.vex.json
