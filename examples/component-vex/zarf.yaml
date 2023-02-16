@@ -1,0 +1,12 @@
+kind: ZarfPackageConfig
+metadata:
+  name: vex-example
+  description: "Demo Zarf package composability with VEX documents"
+
+components:
+  - name: test-component
+    required: true
+    description: "Example component that has a VEX document"
+    vex:
+      - name: test-component-vex
+        path: ./vex/test-component-bad.vex.json

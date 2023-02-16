@@ -13,8 +13,10 @@ import (
 
 	"github.com/defenseunicorns/zarf/src/config"
 	"github.com/defenseunicorns/zarf/src/config/lang"
+	"github.com/defenseunicorns/zarf/src/pkg/message"
 	"github.com/defenseunicorns/zarf/src/pkg/utils"
 	"github.com/defenseunicorns/zarf/src/types"
+	"github.com/openvex/go-vex/pkg/vex"
 )
 
 var (
@@ -25,6 +27,8 @@ var (
 
 // Run performs config validations.
 func Run(pkg types.ZarfPackage) error {
+	message.Debug("inside run")
+
 	if pkg.Kind == "ZarfInitConfig" && pkg.Metadata.YOLO {
 		return fmt.Errorf(lang.PkgValidateErrInitNoYOLO)
 	}
@@ -135,6 +139,15 @@ func validateComponent(pkg types.ZarfPackage, component types.ZarfComponent) err
 
 	if err := validateActionsetVariable(component.Actions.OnRemove); err != nil {
 		return fmt.Errorf(lang.PkgValidateErrAction, err)
+	}
+
+	message.Debug("before vex validate statement")
+
+	for _, vex := range component.Vex {
+		message.Debugf("validating vex: %s", vex.ComponentName)
+		if err := validateVex(vex); err != nil {
+			return fmt.Errorf(lang.AgentErrInvalidOp, err)
+		}
 	}
 
 	return nil
@@ -264,6 +277,18 @@ func validateManifest(manifest types.ZarfManifest) error {
 	// Require files in manifest
 	if len(manifest.Files) < 1 && len(manifest.Kustomizations) < 1 {
 		return fmt.Errorf(lang.PkgValidateErrManifestFileOrKustomize, manifest.Name)
+	}
+
+	return nil
+}
+
+func validateVex(component types.ZarfComponentVex) error {
+	// check valid vex document
+	message.Debugf("vex path: %s", component.Path)
+	_, err := vex.Load(component.Path)
+	if err != nil {
+		message.Debug("here's an error!")
+		return err
 	}
 
 	return nil

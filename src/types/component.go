@@ -54,6 +54,9 @@ type ZarfComponent struct {
 
 	// Data packages to push into a running cluster
 	DataInjections []ZarfDataInjection `json:"dataInjections,omitempty" jsonschema:"description=Datasets to inject into a pod in the target cluster"`
+
+	// Vex Components
+	Vex []ZarfComponentVex `json:"vex,omitempty" jsonschema:"description=Add VEX documents into Zarf package"`
 }
 
 // ZarfComponentOnlyTarget filters a component to only show it for a given local OS and cluster.
@@ -167,4 +170,10 @@ type ZarfComponentImport struct {
 	ComponentName string `json:"name,omitempty"`
 	// For further explanation see https://regex101.com/library/Ldx8yG and https://regex101.com/r/Ldx8yG/1
 	Path string `json:"path" jsonschema:"pattern=^(?!.*###ZARF_PKG_VAR_).*$"`
+}
+
+// ZarfComponentVex structure defines VEX data
+type ZarfComponentVex struct {
+	ComponentName string `json:"name,omitempty"`
+	Path          string `json:"path" jsonschema:"description=The path to copy the data to in the container"`
 }
