@@ -5,6 +5,7 @@
 package packager
 
 import (
+	"bytes"
 	"crypto"
 	"encoding/json"
 	"fmt"
@@ -28,6 +29,7 @@ import (
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/mholt/archiver/v3"
+	"github.com/openvex/go-vex/pkg/vex"
 )
 
 // Create generates a Zarf package tarball for a given PackageConfig and optional base directory.
@@ -393,6 +395,22 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 			gitCfg := git.NewWithSpinner(p.cfg.State.GitServer, spinner)
 			if _, err := gitCfg.Pull(url, componentPath.Repos); err != nil {
 				return nil, fmt.Errorf("unable to pull git repo %s: %w", url, err)
+			}
+		}
+	}
+
+	// Load VEX documents
+	if len(component.Vex) > 0 {
+		// Make vex directory
+		_ = utils.CreateDirectory(componentPath.Vex, 0700)
+
+		// Write vex files
+		for _, vexComponent := range component.Vex {
+			doc, err := vex.Load(vexComponent.Path)
+			if err != nil {
+				b := new(bytes.Buffer)
+				doc.ToJSON(b)
+				utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b)
 			}
 		}
 	}

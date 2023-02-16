@@ -133,6 +133,7 @@ func (p *Packager) createComponentPaths(component types.ZarfComponent) (paths ty
 		Manifests:      filepath.Join(basePath, "manifests"),
 		DataInjections: filepath.Join(basePath, "data"),
 		Values:         filepath.Join(basePath, "values"),
+		Vex:            filepath.Join(basePath, "vex"),
 	}
 
 	return paths, err

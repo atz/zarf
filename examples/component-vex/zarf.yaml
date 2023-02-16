@@ -9,4 +9,4 @@ components:
     description: "Example component that has a VEX document"
     vex:
       - name: test-component-vex
-        path: ./vex/test-component-bad.vex.json
+        path: ./vex/test-component-bad2.vex.json
