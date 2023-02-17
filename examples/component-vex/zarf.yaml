@@ -6,7 +6,11 @@ metadata:
 components:
   - name: test-component
     required: true
-    description: 'Example component that has a VEX document'
+    description: 'Example component that has VEX documents'
     vex:
       - name: test-component-vex
         path: ./vex/test-component.vex.json
+      - name: test-component-vex-2
+        path: ./vex/test-component-2.vex.json
+      # - name: test-bad-component-vex
+      #   path: ./vex/test-component-bad.vex.json

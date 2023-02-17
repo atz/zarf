@@ -405,10 +405,10 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 		// _ = utils.CreateDirectory(componentPath.Vex, 0700)
 
 		// Write vex files
-		for _, vex := range component.Vex {
+		for _, vexComponent := range component.Vex {
 
-			if err := utils.CreatePathAndCopy(vex.Path, componentPath.Vex+"/"+vex.ComponentName); err != nil {
-				return nil, fmt.Errorf("unable to copy file %s: %w", vex.Path, err)
+			if err := utils.CreatePathAndCopy(vexComponent.Path, componentPath.Vex+"/"+vexComponent.ComponentName); err != nil {
+				return nil, fmt.Errorf("unable to copy file %s: %w", vexComponent.Path, err)
 			}
 
 			// doc, err := vex.Load(vexComponent.Path)
