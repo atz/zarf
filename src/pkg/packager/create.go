@@ -5,6 +5,7 @@
 package packager
 
 import (
+	"bytes"
 	"crypto"
 	"encoding/json"
 	"fmt"
@@ -28,6 +29,7 @@ import (
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/mholt/archiver/v3"
+	"github.com/openvex/go-vex/pkg/vex"
 )
 
 // Create generates a Zarf package tarball for a given PackageConfig and optional base directory.
@@ -401,23 +403,32 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 	if len(component.Vex) > 0 {
 		spinner := message.NewProgressSpinner("Loading %d vex docs", len(component.Vex))
 		defer spinner.Success()
+
 		// Make vex directory
-		// _ = utils.CreateDirectory(componentPath.Vex, 0700)
+		err = utils.CreateDirectory(componentPath.Vex, 0700)
+		if err != nil {
+			return nil, fmt.Errorf("unable to create vex destination directory: %w", err)
+		}
 
-		// Write vex files
 		for _, vexComponent := range component.Vex {
-
-			if err := utils.CreatePathAndCopy(vexComponent.Path, componentPath.Vex+"/"+vexComponent.ComponentName); err != nil {
-				return nil, fmt.Errorf("unable to copy file %s: %w", vexComponent.Path, err)
+			// Load VEX file
+			doc, err := vex.Load(vexComponent.Path)
+			if err != nil {
+				return nil, fmt.Errorf("unable to load vex document %s from %s: %w", vexComponent.ComponentName, vexComponent.Path, err)
 			}
 
-			// doc, err := vex.Load(vexComponent.Path)
-			// if err != nil {
-			// 	var b bytes.Buffer
-			// 	w := bufio.NewWriter(&b)
-			// 	doc.ToJSON(w)
-			// 	utils.WriteFile(componentPath.Vex+"/"+vexComponent.ComponentName, b.Bytes())
-			// }
+			// Convert to JSON
+			var b bytes.Buffer
+			if err = doc.ToJSON(&b); err != nil {
+				return nil, fmt.Errorf("unable to write vex doc to JSON for %s: %w", vexComponent.ComponentName, err)
+			}
+			message.Debugf("Loaded VEX file %s (%d bytes)", vexComponent.ComponentName, b.Len())
+
+			// Write VEX file
+			dest := fmt.Sprintf("%s/%s", componentPath.Vex, vexComponent.ComponentName)
+			if err = utils.WriteFile(dest, b.Bytes()); err != nil {
+				return nil, fmt.Errorf("unable to write vex file to %s: %w", dest, err)
+			}
 		}
 	}
 
