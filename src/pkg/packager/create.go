@@ -28,6 +28,8 @@ import (
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/mholt/archiver/v3"
+	"github.com/pterm/pterm"
+	"gopkg.in/yaml.v2"
 )
 
 // Create generates a Zarf package tarball for a given PackageConfig and optional base directory.
@@ -369,12 +371,15 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 		}
 	}
 
-	// Process OSCAL documents
+	// Process OSCAL documents.
 	if len(component.Oscal) > 0 {
+		// Create oscal subdirectory to store files in.
 		if err := utils.CreateDirectory(componentPath.Oscal, 0700); err != nil {
 			return nil, fmt.Errorf("unable to create oscal directory: %w", err)
 		}
 
+		// Copy files from source location to destination directory in the Zarf package.
+		destinationFiles := []string{}
 		for _, oscalDocument := range component.Oscal {
 			message.Debugf("Loading %#v", oscalDocument)
 			destinationFile := filepath.Join(componentPath.Oscal, oscalDocument.Destination)
@@ -386,7 +391,58 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 					return nil, fmt.Errorf("unable to copy file %s: %w", oscalDocument.Source, err)
 				}
 			}
+			destinationFiles = append(destinationFiles, destinationFile)
 		}
+
+		// Read OSCAL files and unmarshal them.
+		oscalDoc := types.OscalComponentDefinitionModel{}
+		oscalDocs := []types.OscalComponentDefinitionModel{}
+		for _, destinationFile := range destinationFiles {
+			oscalBytes, err := os.ReadFile(destinationFile)
+			if err != nil {
+				return nil, fmt.Errorf("unable to read file %s: %w", destinationFile, err)
+			}
+
+			if err := yaml.Unmarshal(oscalBytes, &oscalDoc); err != nil {
+				return nil, fmt.Errorf("unable to unmarshal data into oscal structure: %w", err)
+			}
+			oscalDocs = append(oscalDocs, oscalDoc)
+		}
+
+		// Populate a pterm table of all the components and the controls they satisfy
+		packageTable := pterm.TableData{
+			{"     Component ", "Control ", "Description"},
+		}
+
+		// Iterate over OSCAL data and collect control data.
+		for _, componentDefinition := range oscalDocs {
+			for _, component := range componentDefinition.ComponentDefinition.Components {
+				// Get the name of the component and add it to the pterm table
+				componentName := component.Title
+
+				packageTable = append(packageTable, pterm.TableData{{
+					fmt.Sprintf("     %s", componentName),
+				}}...)
+
+				for _, controlImplementation := range component.ControlImplementations {
+					for _, implementedRequirement := range controlImplementation.ImplementedRequirements {
+						// Get the controls that this component satisfies and add it to the pterm table
+						control := implementedRequirement.ControlId
+						// controlDescription := implementedRequirement.Description
+
+						packageTable = append(packageTable, pterm.TableData{{
+							fmt.Sprintf("     %s", " "),
+							fmt.Sprintf("%s", control),
+							// TODO: the control descriptions are long and don't fit cleanly in the table output
+							// fmt.Sprintf("%s", controlDescription),
+						}}...)
+					}
+				}
+			}
+		}
+
+		// Print out the table for the user
+		_ = pterm.DefaultTable.WithHasHeader().WithData(packageTable).Render()
 	}
 
 	if len(component.DataInjections) > 0 {
