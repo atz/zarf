@@ -59,6 +59,9 @@ type ZarfComponent struct {
 
 	// Extensions provide additional functionality to a component
 	Extensions extensions.ZarfComponentExtensions `json:"extensions,omitempty" jsonschema:"description=Extend component functionality with additional features"`
+
+	// Oscal allows you to include OSCAL files in a Zarf package.
+	Oscal []ZarfComponentOscal `json:"oscal,omitempty" jsonschema:"description=Add OSCAL documents into a Zarf package"`
 }
 
 // ZarfComponentOnlyTarget filters a component to only show it for a given local OS and cluster.
@@ -194,4 +197,10 @@ type ZarfComponentImport struct {
 	ComponentName string `json:"name,omitempty" jsonschema:"description=The name of the component to import from the referenced zarf.yaml"`
 	// For further explanation see https://regex101.com/library/Ldx8yG and https://regex101.com/r/Ldx8yG/1
 	Path string `json:"path" jsonschema:"description=The relative path to a directory containing a zarf.yaml to import from,pattern=^(?!.*###ZARF_PKG_VAR_).*$"`
+}
+
+// ZarfComponentOscal represents OSCAL files to include in a Zarf package.
+type ZarfComponentOscal struct {
+	Source      string `json:"source" jsonschema:"description=Local file path or remote URL to pull into the package"`
+	Destination string `json:"destination" jsonschema:"description=The destination path to copy the OSCAL files to in the Zarf package"`
 }

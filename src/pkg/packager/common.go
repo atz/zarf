@@ -142,6 +142,7 @@ func (p *Packager) createOrGetComponentPaths(component types.ZarfComponent) (pat
 		Manifests:      filepath.Join(basePath, "manifests"),
 		DataInjections: filepath.Join(basePath, "data"),
 		Values:         filepath.Join(basePath, "values"),
+		Oscal:          filepath.Join(basePath, "oscal"),
 	}
 
 	return paths, err

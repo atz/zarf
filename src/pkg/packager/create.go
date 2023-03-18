@@ -369,6 +369,26 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 		}
 	}
 
+	// Process OSCAL documents
+	if len(component.Oscal) > 0 {
+		if err := utils.CreateDirectory(componentPath.Oscal, 0700); err != nil {
+			return nil, fmt.Errorf("unable to create oscal directory: %w", err)
+		}
+
+		for _, oscalDocument := range component.Oscal {
+			message.Debugf("Loading %#v", oscalDocument)
+			destinationFile := filepath.Join(componentPath.Oscal, oscalDocument.Destination)
+
+			if utils.IsURL(oscalDocument.Source) {
+				utils.DownloadToFile(oscalDocument.Source, destinationFile, "")
+			} else {
+				if err := utils.CreatePathAndCopy(oscalDocument.Source, destinationFile); err != nil {
+					return nil, fmt.Errorf("unable to copy file %s: %w", oscalDocument.Source, err)
+				}
+			}
+		}
+	}
+
 	if len(component.DataInjections) > 0 {
 		spinner := message.NewProgressSpinner("Loading data injections")
 		defer spinner.Success()

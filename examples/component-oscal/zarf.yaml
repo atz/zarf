@@ -1,0 +1,16 @@
+kind: ZarfPackageConfig
+metadata:
+  name: oscal-example
+  description: 'Demo Zarf package composability with OSCAL documents'
+components:
+  - name: oscal-data
+    required: true
+    description: 'Example component that has OSCAL documents'
+    oscal:
+        # Copy file from local filesystem
+      - source: ./oscal/kyverno/oscal-component.yaml
+        destination: ./kyverno/oscal-component.yaml
+
+        # Fetch file from remote URL
+      - source: https://repo1.dso.mil/big-bang/product/packages/monitoring/-/raw/main/oscal-component.yaml
+        destination: ./monitoring/oscal-component.yaml

@@ -277,6 +277,14 @@
           "$schema": "http://json-schema.org/draft-04/schema#",
           "$ref": "#/definitions/ZarfComponentExtensions",
           "description": "Extend component functionality with additional features"
+        },
+        "oscal": {
+          "items": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "$ref": "#/definitions/ZarfComponentOscal"
+          },
+          "type": "array",
+          "description": "OSCAL documents to add into a Zarf package"
         }
       },
       "additionalProperties": false,
@@ -571,6 +579,22 @@
           "$schema": "http://json-schema.org/draft-04/schema#",
           "$ref": "#/definitions/ZarfComponentOnlyCluster",
           "description": "Only deploy component to specified clusters"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ZarfComponentOscal": {
+      "required": [
+        "source",
+        "destination"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
