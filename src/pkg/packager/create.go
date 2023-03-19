@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/defenseunicorns/zarf/src/config"
@@ -28,7 +29,6 @@ import (
 	"github.com/defenseunicorns/zarf/src/types"
 	"github.com/google/go-containerregistry/pkg/crane"
 	"github.com/mholt/archiver/v3"
-	"github.com/pterm/pterm"
 	"gopkg.in/yaml.v2"
 )
 
@@ -409,40 +409,29 @@ func (p *Packager) addComponent(component types.ZarfComponent) (*types.Component
 			oscalDocs = append(oscalDocs, oscalDoc)
 		}
 
-		// Populate a pterm table of all the components and the controls they satisfy
-		packageTable := pterm.TableData{
-			{"     Component ", "Control ", "Description"},
-		}
+		// Instantiate new table
+		writer := tabwriter.NewWriter(os.Stdout, 0, 4, 0, '\t', 0)
+		fmt.Fprintln(writer, "COMPONENT\tCONTROL")
 
-		// Iterate over OSCAL data and collect control data.
+		// Iterate over OSCAL data and collect component and control data.
 		for _, componentDefinition := range oscalDocs {
 			for _, component := range componentDefinition.ComponentDefinition.Components {
-				// Get the name of the component and add it to the pterm table
+				// Get the name of the component to add to the table
 				componentName := component.Title
-
-				packageTable = append(packageTable, pterm.TableData{{
-					fmt.Sprintf("     %s", componentName),
-				}}...)
 
 				for _, controlImplementation := range component.ControlImplementations {
 					for _, implementedRequirement := range controlImplementation.ImplementedRequirements {
-						// Get the controls that this component satisfies and add it to the pterm table
+						// Get the controls that this component satisfies to add to the table
 						control := implementedRequirement.ControlId
 						// controlDescription := implementedRequirement.Description
 
-						packageTable = append(packageTable, pterm.TableData{{
-							fmt.Sprintf("     %s", " "),
-							fmt.Sprintf("%s", control),
-							// TODO: the control descriptions are long and don't fit cleanly in the table output
-							// fmt.Sprintf("%s", controlDescription),
-						}}...)
+						// Populate the table with oscal data
+						fmt.Fprintf(writer, "%s\t%s\n", componentName, control)
 					}
 				}
 			}
 		}
-
-		// Print out the table for the user
-		_ = pterm.DefaultTable.WithHasHeader().WithData(packageTable).Render()
+		writer.Flush()
 	}
 
 	if len(component.DataInjections) > 0 {
