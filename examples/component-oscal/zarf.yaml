@@ -1,16 +1,28 @@
 kind: ZarfPackageConfig
 metadata:
   name: oscal-example
-  description: 'Demo Zarf package composability with OSCAL documents'
+  description: Demo Zarf package composability with OSCAL data
+  architecture: amd64
+  version: v0.0.1
+
 components:
   - name: oscal-data
     required: true
-    description: 'Example component that has OSCAL documents'
+    description: OSCAL control inheritance data for Kyverno
     oscal:
-        # Copy file from local filesystem
-      - source: ./oscal/kyverno/oscal-component.yaml
+      - source: https://repo1.dso.mil/big-bang/product/packages/kyverno/-/raw/main/oscal-component.yaml
         destination: ./kyverno/oscal-component.yaml
 
-        # Fetch file from remote URL
-      - source: https://repo1.dso.mil/big-bang/product/packages/monitoring/-/raw/main/oscal-component.yaml
-        destination: ./monitoring/oscal-component.yaml
+  - name: kyverno
+    required: true
+    description: Deploy Kyverno as a Helm chart with Zarf
+    charts:
+      - name: kyverno
+        namespace: kyverno
+        url: oci://registry1.dso.mil/bigbang/kyverno
+        version: 2.6.5-bb.3
+        valuesFiles:
+          - values.yaml
+    images:
+      - registry1.dso.mil/ironbank/nirmata/kyverno:v1.8.5
+      - registry1.dso.mil/ironbank/nirmata/kyvernopre:v1.8.5
