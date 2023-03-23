@@ -52,8 +52,7 @@ This allows Zarf package developers to know what compliance controls their Zarf 
             namespace: kyverno
             url: oci://registry1.dso.mil/bigbang/kyverno
             version: 2.6.5-bb.3
-            valuesFiles:
-              - values.yaml
+            
         images:
           - registry1.dso.mil/ironbank/nirmata/kyverno:v1.8.5
           - registry1.dso.mil/ironbank/nirmata/kyvernopre:v1.8.5
