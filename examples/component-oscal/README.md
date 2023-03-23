@@ -235,13 +235,13 @@ This allows Zarf package developers to know what compliance controls their Zarf 
 1. Extract the `oscal-data.tar` tarball:
 
     ```bash
-    tar -xf kyverno/components/oscal-data.tar
+    tar -xf oscal-data.tar
     ```
 
 1. Examine the Kyverno OSCAL file:
 
     ```bash
-    cat oscal-data/oscal/kyverno/oscal-component.yaml 
+    cat oscal-component.yaml 
     ```
 
     ```yaml
