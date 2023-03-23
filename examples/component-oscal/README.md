@@ -59,11 +59,11 @@ This allows Zarf package developers to know what compliance controls their Zarf 
           - registry1.dso.mil/ironbank/nirmata/kyvernopre:v1.8.5
     ```
 
-    Note the `components.oscal` field. This field is used to specify the OSCAL files that Zarf should include in this package.
+    - Note the `components.oscal` field. This field is used to specify the OSCAL files that Zarf should include in this package.
 
-    The `components.oscal.source` field is used to tell Zarf where to find and fetch an OSCAL file from. This can be either a path to a file on the local filesystem, or a remote URL that points to a raw OSCAL file for Zarf to fetch.
+    - The `components.oscal.source` field is used to tell Zarf where to find and fetch an OSCAL file from. This can be either a path to a file on the local filesystem, or a remote URL that points to a raw OSCAL file for Zarf to fetch.
 
-    The `components.oscal.destination` field is used to tell Zarf what path or directory to put the OSCAL files in the Zarf package bundle.
+    - The `components.oscal.destination` field is used to tell Zarf what path or directory to put the OSCAL files in the Zarf package bundle.
 
 1. Create the Zarf package with the code changes on this branch by running `go run`:
 
@@ -87,11 +87,150 @@ This allows Zarf package developers to know what compliance controls their Zarf 
 
     The output shows which controls are satisfied by the application based on the OSCAL files included in the Zarf package.
 
-1. Extract the Zarf package:
+1. Publish the Zarf package:
 
     ```bash
-    zarf tools archiver decompress zarf-package-oscal-example-amd64.tar.zst kyverno
+    zarf package publish zarf-package-oscal-example-amd64-v0.0.1.tar.zst oci://ghcr.io/lucasrod16/oscal-attestations
     ```
+
+1. Fetch the OCI manifest data to view the layers of the Zarf package artifact:
+
+    ```bash
+    oras manifest fetch ghcr.io/lucasrod16/oscal-attestations/oscal-example:v0.0.1-amd64 | jq    
+    ```
+
+    ```json
+    {
+      "schemaVersion": 2,
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "config": {
+        "mediaType": "application/vnd.unknown.config.v1+json",
+        "digest": "sha256:4f6889e95cfc2274989064a127db448b4172a39d2516d8d4a641b03970479112",
+        "size": 199
+      },
+      "layers": [
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.yaml",
+          "digest": "sha256:a6623e02219aded6697fea5e5dda34a3902583041a6d78d4ede923158185168e",
+          "size": 970,
+          "annotations": {
+            "org.opencontainers.image.title": "zarf.yaml"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.json",
+          "digest": "sha256:7aa18de50893ad98ae875f57c826b778d4cf6e5696e5adc1422715278f7add29",
+          "size": 552,
+          "annotations": {
+            "org.opencontainers.image.title": "images/index.json"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:b66dbb27a73334db6ac9c030475837bd7f4472d835c72b2360534b203edce6cb",
+          "size": 37,
+          "annotations": {
+            "org.opencontainers.image.title": "images/oci-layout"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:814e36828fa5ffe6ce32180598fdaeb875b37e6ced925e84695d0be54fb4082a",
+          "size": 1418752,
+          "annotations": {
+            "org.opencontainers.image.title": "sboms.tar"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:a979b9034ff5e97ff7e271bc518419b53ad2caf1e6d68e9ebce525981af8a2a7",
+          "size": 164864,
+          "annotations": {
+            "org.opencontainers.image.title": "components/kyverno.tar"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:a8dc32908a7c749be803a73e6bad9390fa274c6dc98d679eec9ae670b91b4e62",
+          "size": 6656,
+          "annotations": {
+            "org.opencontainers.image.title": "components/oscal-data.tar"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:0b865eb7762279bf1bc664ae95a81b1d0bf930e5ce311c3060a1144c2f4b80c2",
+          "size": 779,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/0b865eb7762279bf1bc664ae95a81b1d0bf930e5ce311c3060a1144c2f4b80c2"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:6c72b770dfadb39add6b51df5ed013c543e4c85dedc1ba4b8ee186aecffaa18c",
+          "size": 9221,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/6c72b770dfadb39add6b51df5ed013c543e4c85dedc1ba4b8ee186aecffaa18c"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:8aeb1268f49f24aebc2067aafc265cadf8fe32c83cf926beef73f3bc7414d86c",
+          "size": 9652,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/8aeb1268f49f24aebc2067aafc265cadf8fe32c83cf926beef73f3bc7414d86c"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:bd9ddc54bea929a22b334e73e026d4136e5b73f5cc29942896c72e4ece69b13d",
+          "size": 34,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/bd9ddc54bea929a22b334e73e026d4136e5b73f5cc29942896c72e4ece69b13d"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:cbdf1a17b4c5abcd6b7c30412f08740305a3806766b8f0d48b94a0c2406ec562",
+          "size": 25370902,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/cbdf1a17b4c5abcd6b7c30412f08740305a3806766b8f0d48b94a0c2406ec562"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:dddbd69d8dbfebd560c573bce53e0b9c6d45fe4a46de6ec83f84b8995d6273e9",
+          "size": 19240488,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/dddbd69d8dbfebd560c573bce53e0b9c6d45fe4a46de6ec83f84b8995d6273e9"
+          }
+        },
+        {
+          "mediaType": "application/vnd.zarf.layer.v1.unknown",
+          "digest": "sha256:de4f10a6c58287a416b639ff11f145617c8c7c48bfbb4e4e07e1028bc59296c9",
+          "size": 779,
+          "annotations": {
+            "org.opencontainers.image.title": "images/blobs/sha256/de4f10a6c58287a416b639ff11f145617c8c7c48bfbb4e4e07e1028bc59296c9"
+          }
+        }
+      ],
+      "annotations": {
+        "org.opencontainers.image.created": "2023-03-22T19:53:10Z",
+        "org.opencontainers.image.description": "Demo Zarf package composability with OSCAL data"
+      }
+    }
+
+    ```
+
+    Get the checksum (the layer digest) of the oscal-data.tar layer, which in this case is `sha256:a8dc32908a7c749be803a73e6bad9390fa274c6dc98d679eec9ae670b91b4e62`
+
+1. Fetch the `oscal-data.tar` tarball using the checksum:
+
+    ```bash
+    oras blob fetch --output oscal-data.tar ghcr.io/lucasrod16/oscal-attestations/oscal-example@sha256:a8dc32908a7c749be803a73e6bad9390fa274c6dc98d679eec9ae670b91b4e62
+    ```
+
+    This saves the tarball as `oscal-data.tar` in your local working directory.
 
 1. Extract the `oscal-data.tar` tarball:
 
@@ -180,10 +319,4 @@ This allows Zarf package developers to know what compliance controls their Zarf 
         title: Big Bang Kyverno package
         rlinks:
           - href: https://repo1.dso.mil/platform-one/big-bang/apps/sandbox/kyverno
-    ```
-
-1. Push the Zarf package to an OCI registry:
-
-    ```bash
-    zarf package publish zarf-package-oscal-example-amd64-v0.0.1.tar.zst oci://<registry>/<account>
     ```
