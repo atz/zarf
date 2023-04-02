@@ -31,7 +31,7 @@ require (
 	github.com/otiai10/copy v1.9.0
 	github.com/pkg/errors v0.9.1
 	github.com/pterm/pterm v0.12.57
-	github.com/sigstore/cosign v1.13.1
+	github.com/sigstore/cosign/v2 v2.0.0
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
